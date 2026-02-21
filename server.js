@@ -3,25 +3,52 @@ import cors from "cors";
 
 const app = express();
 
-// Allow Vercel frontend to access backend
-app.use(cors());
+// Allow requests from your Vercel site
+app.use(
+    cors({
+        origin: "https://proactive-lifestyle.vercel.app",
+    })
+);
 
 app.use(express.json());
 
+// Test route
 app.get("/", (req, res) => {
-  res.send("Backend is running 🚀");
+    res.send("Backend working 🚀");
 });
 
-// Example contact form endpoint
-app.post("/contact", (req, res) => {
-  const { name, email, message } = req.body;
+// CONTACT ROUTE
+app.post("/contact", async (req, res) => {
+    const { name, email, phone, message } = req.body;
 
-  console.log(name, email, message);
+    // Validate required fields
+    if (!name || !email || !phone || !message) {
+        return res.status(400).json({
+            success: false,
+            code: "MISSIN_REQUIRED_FIELDS",
+        });
+    }
 
-  res.json({ success: true, message: "Form received" });
+    try {
+        // 👉 Here you can send email / store in DB
+
+        console.log("New Contact Request:");
+        console.log({ name, email, phone, message });
+
+        return res.json({
+            success: true,
+            message: "Message received successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            code: "EMAIL_SEND_FAILED",
+        });
+    }
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
